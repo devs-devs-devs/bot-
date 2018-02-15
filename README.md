@@ -18,6 +18,7 @@ Features:
 * Meme things (right there, lil funnel)
 * IdleRPG
 * Polls
+* Last seen command
 
 Other:
-* If free slack, re-organise media onto imgur?
+* If free slack, re-organise media onto imgur/dropbox?
