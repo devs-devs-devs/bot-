@@ -1,0 +1,39 @@
+{
+  "name": "bot3",
+  "version": "0.0.1",
+  "description": "Bot³",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/index.ts | bunyan"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devs-devs-devs/bot-.git"
+  },
+  "author": "Ash Taylor (a@zi.vc)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devs-devs-devs/bot-/issues"
+  },
+  "homepage": "https://github.com/devs-devs-devs/bot-#readme",
+  "dependencies": {
+    "@slack/client": "^3.16.0",
+    "@types/body-parser": "^1.16.8",
+    "@types/bunyan": "^1.8.4",
+    "@types/chalk": "^2.2.0",
+    "@types/express": "^4.11.1",
+    "@types/node": "^9.4.6",
+    "body-parser": "^1.18.2",
+    "bunyan": "^1.8.12",
+    "chalk": "^2.3.1",
+    "dotenv": "^5.0.0",
+    "express": "^4.16.2",
+    "mysql2": "^1.5.2",
+    "ts-node": "^4.1.0",
+    "typescript": "^2.7.2"
+  },
+  "devDependencies": {
+    "@types/mysql2": "github:types/mysql2"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "rootDir": "./src",
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "declaration": false,
+    "outDir": "./build/",
+    "strict": true
+  },
+  "files": [
+  ],
+  "typeRoots": [
+    "@types",
+    "./node_modules/",
+    "./typings/"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ]
+}

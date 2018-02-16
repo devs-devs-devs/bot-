@@ -1,0 +1,17 @@
+{
+  "extends": ["tslint:latest"],
+  "rules": {
+    "indent": ["spaces", 4],
+    "callable-types": false,
+    "no-implicit-dependencies": false,
+    "only-arrow-functions": [true, "allow-declarations", "allow-named-functions"],
+    "object-literal-shorthand": false,
+    "object-literal-sort-keys": false,
+    "quotemark": [true, "single", "avoid-escape", "avoid-template"],
+    "no-shadow": ["error", { "builtinGlobals": false, "hoist": "functions", "allow": [] }],
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
+    "no-angle-bracket-type-assertion": false,
+    "no-console": false,
+    "no-duplicate-imports": false
+  }
+}
