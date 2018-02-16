@@ -4,7 +4,11 @@ export type TRTMClient = any;
 // TODO This is the Slack Web Client
 export type TWebClient = any;
 
-export type ISlackChannel = {
+export interface IBotSlackChannel extends ISlackChannel {
+    teamId: string;
+}
+
+export interface ISlackChannel {
     id: string;
     name: string;
     is_channel: boolean;

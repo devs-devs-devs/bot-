@@ -9,14 +9,16 @@
 import Data from './Data';
 import Logger from './Logger';
 import { Pool } from 'mysql2/promise';
-import IInstall, { IBot3AppData, ISlackChannel, TRTMClient } from '../interfaces/slack';
+import { IBotSlackChannel, ISlackChannel } from '../interfaces/slack';
 import { RtmClient, WebClient, CLIENT_EVENTS, RTM_EVENTS } from '@slack/client';
-import RowDataPacket = require('mysql/lib/protocol/packets/RowDataPacket');
+import IInstall from '../interfaces/iinstall';
+import IBot3AppData from '../interfaces/ibot3appdata';
 
 class Daemon {
 
     private pool: Pool;
     private installs: Map<string, IInstall> = new Map();
+    private channels: Map<string, any> = new Map();
 
     public async init() {
         this.pool = await Data.getPool();
@@ -56,12 +58,17 @@ class Daemon {
     private bindEvents(install: IInstall) {
 
         if (!install) return Logger.error('No install passed into bindEvents');
-        if (!install.store) install.store = {};
+        if (!install.store) {
+            install.store = {
+                teamId:'',
+                botId:'',
+                channels:[]
+            };
+        }
 
-        const { rtm, web, store } = install;
+        const { rtm, store } = install;
 
         rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, async (connectData: any) => {
-
             const { domain, name } = connectData.team;
             const blob = JSON.stringify(connectData);
 
@@ -70,7 +77,7 @@ class Daemon {
             store.botId = connectData.self.id;
             store.teamId = connectData.team.id;
 
-            await this.getChannels(store.teamId);
+            if (store.teamId) await this.requestChannels(store.teamId);
         });
 
         rtm.on(RTM_EVENTS.MESSAGE, (message: any) => {
@@ -82,30 +89,39 @@ class Daemon {
             // DO BOTT STUFF HERE
 
         });
-
         rtm.start();
-
     }
 
-    private async getChannels(teamId: string) {
+    private async requestChannels(teamId: string) {
+
         Logger.info(`Getting channels for: ${teamId}`);
-        const { web, store } = this.installs.get(teamId);
-        const channelObj = await web.channels.list();
-        store.channels = channelObj.channels;
-        await this.persistChannels(teamId);
-        return store.channels;
+
+        const install = this.installs.get(teamId);
+        if (!install) return Logger.error('No install exists for team', teamId);
+
+        const { web, store } = install;
+
+        const channelObj: {channels:IBotSlackChannel[]} = await web.channels.list();
+
+        channelObj.channels.forEach((channel) => {
+            channel.teamId = teamId;
+            this.channels.set(channel.id, channel);
+        });
+
+        this.persistChannels();
+
     }
 
-    private async persistChannels(teamId: string) {
-        Logger.info(`Persisting channels for: ${teamId}`);
-        const { channels } = this.installs.get(teamId).store;
-        const channelQueries = channels.map( (channel: ISlackChannel) => {
-            Logger.info(`Updating channel: ${channel.id} @ ${teamId}`);
+    private async persistChannels() {
+        Logger.info(`Persisting channels`);
+
+        const channelsArr = Array.from(this.channels);
+
+        await Promise.all(channelsArr.map(async ([channelId,channel]: [string, IBotSlackChannel]) => {
+            const teamId = channel.teamId;
             const blob = JSON.stringify(channel);
-            return this.pool.query('INSERT INTO channels (id, team, json) VALUES (?,?,?) ON DUPLICATE KEY UPDATE json = ?', [channel.id, teamId, blob, blob]);
-        });
-        await Promise.all(channelQueries);
-        Logger.info(`Updated all channels for: ${teamId}`);
+            await this.pool.query('INSERT INTO channels (id, team, json) VALUES (?,?,?) ON DUPLICATE KEY UPDATE json = ?', [channel.id, teamId, blob, blob]);
+        }));
     }
 
 }
