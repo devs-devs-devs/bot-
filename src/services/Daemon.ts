@@ -6,7 +6,7 @@
 
  */
 
-import Data from './Data';
+import BotData from './Data';
 import Logger from './Logger';
 import { Pool } from 'mysql2/promise';
 import { IBotSlackChannel, ISlackChannel } from '../interfaces/slack';
@@ -16,13 +16,12 @@ import IBot3AppData from '../interfaces/ibot3appdata';
 
 class Daemon {
 
-    private pool: Pool;
+    private pool: Pool = BotData.getPool();
     private installs: Map<string, IInstall> = new Map();
     private channels: Map<string, any> = new Map();
 
-    public async init() {
-        this.pool = await Data.getPool();
-        await this.fetchInstalls();
+    public init() {
+        this.fetchInstalls();
     }
 
     private async fetchInstalls() {
@@ -99,7 +98,7 @@ class Daemon {
         const install = this.installs.get(teamId);
         if (!install) return Logger.error('No install exists for team', teamId);
 
-        const { web, store } = install;
+        const { web } = install;
 
         const channelObj: {channels:IBotSlackChannel[]} = await web.channels.list();
 

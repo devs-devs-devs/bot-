@@ -4,36 +4,32 @@ import chalk from 'chalk';
 
 const { MYSQL_DB, MYSQL_USER, MYSQL_PASS, MYSQL_HOST } = process.env;
 
-class Data {
+class BotData {
 
-    public pool: Pool;
+    public static pool: Pool;
     private serviceName: any = chalk.yellow('Data:');
 
     constructor() {
         Logger.info(this.serviceName, 'service loaded');
+        BotData.pool = this.createPool();
     }
 
-    async createPool() {
-        if (this.pool) return this.pool;
-        try {
-            this.pool = await createPool({
-                connectionLimit: 10,
-                host: MYSQL_HOST,
-                user: MYSQL_USER,
-                password: MYSQL_PASS,
-                database: MYSQL_DB
-            });
-            Logger.info(this.serviceName, 'Pool created');
-        } catch(e) {
-            throw Logger.error('Unable to create MySQL pool', { MYSQL_DB, MYSQL_USER, MYSQL_HOST });
-        }
-        return this.pool;
+    createPool() {
+        if (BotData.pool) return BotData.pool;
+        BotData.pool = createPool({
+            connectionLimit: 10,
+            host: MYSQL_HOST,
+            user: MYSQL_USER,
+            password: MYSQL_PASS,
+            database: MYSQL_DB
+        });
+        return BotData.pool;
     }
 
-    async getPool() {
-        return await this.createPool();
+    getPool() {
+        return BotData.pool;
     }
 
 }
 
-export default new Data();
+export default new BotData();
