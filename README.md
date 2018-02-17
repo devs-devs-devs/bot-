@@ -19,6 +19,7 @@ Features:
 - [ ] IdleRPG
 - [ ] Polls
 - [ ] Last seen command
+- [ ] Reply to threads instead of channel
 
 Other:
 - [ ] If free slack, re-organise media onto imgur/dropbox?
