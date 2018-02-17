@@ -9,10 +9,9 @@
 import BotData from './Data';
 import Logger from './Logger';
 import { Pool } from 'mysql2/promise';
-import { IBotSlackChannel, ISlackChannel } from '../interfaces/slack';
-import { RtmClient, WebClient, CLIENT_EVENTS, RTM_EVENTS } from '@slack/client';
+import { IBotSlackChannel } from '../interfaces/slack';
+import { CLIENT_EVENTS, RTM_EVENTS, RtmClient, WebClient } from '@slack/client';
 import IInstall from '../interfaces/iinstall';
-import IBot3AppData from '../interfaces/ibot3appdata';
 
 class Daemon {
 
@@ -80,6 +79,13 @@ class Daemon {
         });
 
         rtm.on(RTM_EVENTS.MESSAGE, (message: any) => {
+
+            Logger.info(message);
+
+            // Process different message types here
+
+            this.pool.query('INSERT INTO `chat` SET ?', message);
+
             if ( (message.subtype && message.subtype === 'bot_message') ||
                 (!message.subtype && message.user === store.botId) ) {
                 return;

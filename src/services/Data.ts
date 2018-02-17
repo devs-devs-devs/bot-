@@ -1,4 +1,4 @@
-import { Pool, createPool } from 'mysql2/promise';
+import { createPool, Pool } from 'mysql2/promise';
 import Logger from './Logger';
 import chalk from 'chalk';
 

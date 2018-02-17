@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 "use strict";
 
+import GitHubWebHook from './services/Github';
+
 require('dotenv').config();
 
 const { env } = process;
@@ -23,6 +25,8 @@ process.chdir(__dirname);
 
 const app = express();
 app.use(bodyParser.json());
+
+new GitHubWebHook(app);
 
 app.listen(env.BOT3_EXPRESS_PORT, () => {
     Logger.info(chalk.green('Express'), `Listening on port: ${env.BOT3_EXPRESS_PORT}`);
