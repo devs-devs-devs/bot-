@@ -6,18 +6,21 @@
 
  */
 
+import * as _ from 'lodash';
 import BotData from './Data';
 import Logger from './Logger';
 import { Pool } from 'mysql2/promise';
-import { IBotSlackChannel } from '../interfaces/slack';
+import { IBotSlackChannel, ISlackEvent } from '../interfaces/slack';
 import { CLIENT_EVENTS, RTM_EVENTS, RtmClient, WebClient } from '@slack/client';
 import IInstall from '../interfaces/iinstall';
+import Message from '../slack-types/Message';
 
 class Daemon {
 
     private pool: Pool = BotData.getPool();
     private installs: Map<string, IInstall> = new Map();
     private channels: Map<string, any> = new Map();
+    private members: Map<string, any> = new Map();
 
     public init() {
         this.fetchInstalls();
@@ -75,25 +78,15 @@ class Daemon {
             store.botId = connectData.self.id;
             store.teamId = connectData.team.id;
 
-            if (store.teamId) await this.requestChannels(store.teamId);
-        });
-
-        rtm.on(RTM_EVENTS.MESSAGE, (message: any) => {
-
-            Logger.info(message);
-
-            // Process different message types here
-
-            this.pool.query('INSERT INTO `chat` SET ?', message);
-
-            if ( (message.subtype && message.subtype === 'bot_message') ||
-                (!message.subtype && message.user === store.botId) ) {
-                return;
+            if (store.teamId) {
+                const { teamId } = store;
+                await this.requestChannels(teamId);
+                await this.requestMembers(teamId);
+                rtm.on(RTM_EVENTS.MESSAGE, (event: ISlackEvent) => Message.in(install, event));
             }
 
-            // DO BOTT STUFF HERE
-
         });
+
         rtm.start();
     }
 
@@ -115,6 +108,36 @@ class Daemon {
 
         this.persistChannels();
 
+    }
+
+    private async requestMembers(teamId: string) {
+        Logger.info(`Getting members for: ${teamId}`);
+
+        const install = this.installs.get(teamId);
+        if (!install) return Logger.error('No install exists for team', teamId);
+
+        const { web } = install;
+        const membersObj = await web.users.list();
+
+        membersObj.members.forEach((member: any) => {
+            this.members.set(member.id, member);
+        });
+
+        this.persistMembers();
+
+    }
+
+    private async persistMembers() {
+        Logger.info(`Persisting members`);
+
+        const membersArr = Array.from(this.members);
+
+        await Promise.all(membersArr.map(async ([memberId, member]: [string, any]) => {
+            const profile = JSON.stringify(member.profile);
+            const { id, team_id, name, deleted, is_bot, updated, is_app_user } = member;
+            await this.pool.query(`INSERT INTO members (id, team_id, name, deleted, profile, is_bot, updated, is_app_user)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = ?, deleted = ?, profile = ?, updated = ?`, [id, team_id, name, deleted, profile, is_bot, updated, is_app_user, name, deleted, profile, updated]);
+        }))
     }
 
     private async persistChannels() {
