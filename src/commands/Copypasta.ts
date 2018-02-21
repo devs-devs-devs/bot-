@@ -1,8 +1,6 @@
 import BotData from '../services/Data';
 import { Pool } from 'mysql2/promise';
 import Command from './Command';
-import Message from '../slack-types/Message';
-import Daemon from '../services/Daemon';
 
 export default class Copypasta extends Command {
 

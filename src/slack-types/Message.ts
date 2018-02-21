@@ -2,7 +2,6 @@ import BotData from '../services/Data';
 import Logger from '../services/Logger';
 import { Pool } from 'mysql2/promise';
 import * as md5 from 'md5';
-import { CommandInterface } from '../commands/Command';
 import Seen from '../commands/Seen';
 import IInstall from '../interfaces/iinstall';
 import _ = require('lodash');

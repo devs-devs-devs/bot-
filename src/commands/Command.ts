@@ -1,6 +1,5 @@
 import Logger from '../services/Logger';
 import chalk from 'chalk';
-import { ISlackMessage } from '../interfaces/slack';
 
 export interface CommandInterface {
     reply: any

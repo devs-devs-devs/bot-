@@ -6,7 +6,6 @@
 
  */
 
-import * as _ from 'lodash';
 import BotData from './Data';
 import Logger from './Logger';
 import { Pool } from 'mysql2/promise';

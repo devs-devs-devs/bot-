@@ -2,7 +2,6 @@ import IInstall from '../interfaces/iinstall';
 import Message from './Message';
 import { Pool } from 'mysql2/promise';
 import BotData from '../services/Data';
-import Daemon from '../services/Daemon';
 
 const pool: Pool = BotData.getPool();
 

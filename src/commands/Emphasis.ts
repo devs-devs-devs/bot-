@@ -1,4 +1,4 @@
-import Command from './command';
+import Command from './Command';
 import Message from '../slack-types/Message';
 
 export class Emphasis extends Command {
