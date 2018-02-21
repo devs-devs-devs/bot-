@@ -10,6 +10,7 @@ import { Emphasis } from '../commands/Emphasis';
 import RightThere from '../commands/RightThere';
 import Copypasta from '../commands/Copypasta';
 import Trigger from '../commands/Trigger';
+import { QDB } from '../commands/QDB';
 
 const TRIGGER_PREFIX: string = '!';
 const pool: Pool = BotData.getPool();
@@ -21,6 +22,7 @@ const registeredCommands = [
     new RightThere(),
     new Copypasta(),
     triggerScan,
+    new QDB(),
 ];
 
 export default class Message {
@@ -131,7 +133,7 @@ export default class Message {
             event.user = message.user;
             await pool.query('INSERT INTO `botreplys` SET ?', event);
         })
-        .catch((err: any) => Logger.error(err));
+            .catch((err: any) => Logger.error(err));
         return promise;
     }
 
@@ -176,17 +178,3 @@ export default class Message {
     }
 
 }
-
-
-// Logger.info(message);
-//
-// // Process different message types here
-//
-// this.pool.query('INSERT INTO `chat` SET ?', message);
-//
-// if ( (message.subtype && message.subtype === 'bot_message') ||
-//     (!message.subtype && message.user === store.botId) ) {
-//     return;
-// }
-//
-// // DO BOTT STUFF HERE
