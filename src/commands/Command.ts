@@ -23,11 +23,20 @@ export default class Command implements CommandInterface {
         Logger.info(chalk.magenta(this.name), 'loaded');
     }
 
-    reply(text: string, triggerPhrase: string): any {
-        return text;
+    reply(message: any, obj: any): any {
+        return message.text || '';
     }
 
     public static parseText(text: string = ''): any {
+        const splitText = text.split(' ');
+        return {
+            trigger:splitText.shift() || '',
+            action:splitText.shift() || '',
+            params:splitText.join(' ')
+        }
+    }
+
+    parseText(text: string = ''): any {
         const splitText = text.split(' ');
         return {
             trigger:splitText.shift() || '',

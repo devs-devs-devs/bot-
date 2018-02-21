@@ -6,12 +6,22 @@ import { CommandInterface } from '../commands/Command';
 import Seen from '../commands/Seen';
 import IInstall from '../interfaces/iinstall';
 import _ = require('lodash');
+import Member from './Members';
+import { Emphasis } from '../commands/Emphasis';
+import RightThere from '../commands/RightThere';
+import Copypasta from '../commands/Copypasta';
+import Trigger from '../commands/Trigger';
 
 const TRIGGER_PREFIX: string = '!';
 const pool: Pool = BotData.getPool();
+const triggerScan = new Trigger()
 
 const registeredCommands = [
-    new Seen()
+    new Seen(),
+    new Emphasis(),
+    new RightThere(),
+    new Copypasta(),
+    triggerScan,
 ];
 
 export default class Message {
@@ -19,10 +29,9 @@ export default class Message {
     public static async in(install: IInstall, event: any) {
         const obj = Message.installObj(install);
 
-        Logger.info('Message', {teamId: _.get(install, 'store.teamId'), event});
-
         if ( (event.subtype && event.subtype === 'bot_message') ||
-            (!event.subtype && event.user === obj.botId) ) {
+            (!event.subtype && event.user === obj.botId) ||
+            (event.message && event.message.user === obj.botId)) {
             return;
         }
 
@@ -39,6 +48,12 @@ export default class Message {
             case 'message_changed':
                 return Message.updateMessage(obj, event);
 
+            case 'channel_join':
+                return Member.in(install, event);
+
+            case 'channel_leave':
+                return Member.in(install, event);
+
             default:
                 if (event.subtype) return;
                 return Message.writeMessage(obj, event);
@@ -46,22 +61,26 @@ export default class Message {
         }
     }
 
-    public static async writeMessage(obj: any, event: any) {
+    public static async writeMessage(obj: any, event: any, runTriggers: boolean = true) {
 
         const message = event.message ? event.message : event;
-        const { teamId } = obj;
+        const {teamId} = obj;
         if (event.subtype) message.subtype = event.subtype
         message.team = teamId;
         message.thumb = Message.thumb(message.ts, message.channel, message.user, teamId);
         if (message.source_team) delete message.source_team;
         if (message.attachments) message.attachments = JSON.stringify(message.attachments);
-        await pool.query('INSERT INTO `events` SET ?', message);
-        Message.runTriggers(obj, message);
+
+        const {thumb, parent, ts, type, subtype, channel, user, text, team, attachments} = message;
+        const writeable = {thumb, parent, ts, type, subtype, channel, user, text, team, attachments};
+        await pool.query('INSERT INTO `events` SET ?', writeable);
+        if (runTriggers) {
+            Message.runTriggers(obj, message);
+        }
     }
 
-    public static async updateMessage(obj: any, event: any) {
-        console.log('UPDATED MESSAGE', event);
 
+    public static async updateMessage(obj: any, event: any) {
         const team = obj.teamId;
         const { channel, message, subtype } = event;
         const { ts, user, type, text, attachments = null } = message;
@@ -69,14 +88,21 @@ export default class Message {
         const thumb = Message.thumb(ts, channel, user, team);
 
         await pool.query('UPDATE `events` SET edited = ? WHERE thumb = ?', [event.ts, thumb]);
-        await Message.writeMessage(obj, { thumb, ts, type, subtype, channel, user, text, team, attachments })
 
-        // const { teamId } = obj;
-        // const { channel, message: { ts, user } } = event;
-        // event.message.channel = channel;
-        // const thumb = Message.thumb(ts, channel, user, teamId);
-        // await pool.query('UPDATE `events` SET edited = ? WHERE thumb = ?', [event.ts, thumb]);
-        // await Message.writeMessage(obj, event.message);
+        const [replies] = await pool.query('SELECT * FROM `botreplys` WHERE userts = ? AND team = ? AND CHANNEL = ? AND user = ?', [message.ts, team, channel, user]) as any;
+
+        if (replies.length) {
+            const reply = replies[0];
+            const command = await Message.findTrigger(obj, event);
+
+            if (command) obj.install.rtm.updateMessage({
+                ts: reply.ts,
+                channel: reply.channel,
+                text: await command.reply(event.message, obj) || 'Some issue fam'
+            });
+
+        }
+        await Message.writeMessage(obj, { thumb, ts, type, subtype, channel, user, text, team, attachments }, false)
     }
 
     public static async deletedMessage(obj: any, event: any) {
@@ -94,27 +120,50 @@ export default class Message {
         return md5(Array.from(arguments).join(''));
     }
 
-    public static async runTriggers(obj: any, message: any) {
+    public static async sendMessage(obj: any, reply: any, message: any) {
+        if (!reply) return;
+        const { teamId } = obj;
+        const { channel } = message;
+        const promise = typeof reply === 'string' ? obj.install.rtm.sendMessage(reply, channel) : obj.install.rtm.send(reply);
+        promise.then(async (event: any) => {
+            event.userts = message.ts;
+            event.thumb = Message.thumb(message.ts, message.channel, message.user, teamId);
+            event.team = teamId;
+            event.user = message.user;
+            await pool.query('INSERT INTO `botreplys` SET ?', event);
+        })
+        .catch((err: any) => Logger.error(err));
+        return promise;
+    }
 
-        const { rtm } = obj.install;
-
+    public static async findTrigger(obj: any, event: any) {
+        const message = event.message ? event.message : event;
         const trigger = message.text.split(' ', 1)[0];
         const triggerPhrase = trigger.substr(1).toLowerCase();
+        message.triggerPhrase = triggerPhrase;
         const RC = registeredCommands.filter(command => {
             return command.commands.indexOf(triggerPhrase) !== -1;
         });
-        if (RC.length === 1) {
-            const command = RC[0];
-            message.triggerPhrase = triggerPhrase;
-            const reply = await command.reply(message);
-            if (reply === null) return;
-            rtm.sendMessage(reply, message.channel)
-                .then(() => console.log('message sent'))
-                .catch((err: any) => Logger.error(err));
+        if (RC.length) return RC[0];
+        return false;
+    }
+
+    public static async runTriggers(obj: any, message: any) {
+
+        const command = await Message.findTrigger(obj, message);
+        if (command) {
+            const reply = await command.reply(message, obj);
+            if (reply) return Message.sendMessage(obj, reply, message);
+        } else {
+            const reply = await triggerScan.scan(message, obj);
+            if (reply) return Message.sendMessage(obj, reply, message);
         }
+
+        return false;
     }
 
     public static splitTrigger(text: string, trigger: string): string[] {
+        console.log('splitt', text, trigger);
         return [trigger, text.substring(trigger.length + 1)];
     }
 

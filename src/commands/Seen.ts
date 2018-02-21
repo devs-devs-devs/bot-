@@ -20,7 +20,7 @@ export default class Seen extends Command {
         // Do nothing
     }
 
-    async reply(message: any) {
+    async reply(message: any, obj: any) {
 
         const [ trigger, params ] = Message.splitTrigger(message.text, message.triggerPhrase);
 
@@ -36,7 +36,7 @@ export default class Seen extends Command {
 
         if (cleanedUser === message.user) return `I'm not a mirror m8`;
 
-        const [ lastEvents ] = await this.pool.query('SELECT * FROM `events` WHERE user = ? ORDER BY id DESC LIMIT 1', [cleanedUser]) as any;
+        const [ lastEvents ] = await this.pool.query('SELECT * FROM `events` WHERE user = ? AND team = ? ORDER BY id DESC LIMIT 1', [cleanedUser, obj.teamId]) as any;
 
         if (lastEvents.length) {
 
@@ -48,16 +48,28 @@ export default class Seen extends Command {
                 case 'message':
                     activity = `writing ${lastEvent.text} in <#${lastEvent.channel}>`;
                     break;
+
+                case 'channel_join':
+                    activity = `joining <#${lastEvent.channel}`;
+                    break;
+
+                case 'channel_leave':
+                    activity = `leaving <#${lastEvent.channel}`;
+                    break;
+
+                case 'presence_change':
+                    activity = `marked as ${lastEvent.text}`;
+                    break;
             }
 
             const when = timeAgo.format(new Date(lastEvent.ts * 1000));
 
-            return `${user} was last seen ${activity} on ${when}`;
+            return `${user} was last seen ${activity} ${when}`;
 
         } else {
-            return `No events for ${user}`;
+            return `I haven't seen ${user} recently`;
         }
-        
+
     }
 
 }
