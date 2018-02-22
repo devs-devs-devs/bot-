@@ -1,5 +1,4 @@
 import Command from './Command';
-import Message from '../slack-types/Message';
 import qdb = require('qdb-api');
 
 export class QDB extends Command {

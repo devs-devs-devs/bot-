@@ -13,18 +13,21 @@ export class Emphasis extends Command {
     }
 
     async reply(message: any, obj: any) {
-        const [ trigger, params ] = Message.splitTrigger(message.text, message.triggerPhrase);
-        const action = params.split(' ')[0];
+        const [ text, trigger, action, ...params ] = Message.splitTrigger(message.text);
 
-        const emoji = action[0] === ':' ? action : ':clap:';
-        const sentence = action [0] === ':' ? params : `${action} ${params}`.trim();
+        if (!params.length) return;
 
-        const emphasis = sentence.split(' ').join(` ${emoji }`).trim();
+        let emoji = ':clap:';
 
-        if (!emphasis) return false;
+        if (action[0] === ':' && action[action.length - 1] === ':') {
+            emoji = action;
+        } else {
+            params.unshift(action);
+        }
 
-        return `_${emphasis}_`;
+        const sentence = params.join(` ${emoji} `);
 
+        return `_${sentence}_`;
     }
 
 }

@@ -62,9 +62,16 @@ export default class Message {
         }
     }
 
+    public static removeDoubleSpaces(text: string) {
+        return text.split(' ').filter((word) => word !== '').join(' ');
+    }
+
     public static async writeMessage(obj: any, event: any, runTriggers: boolean = true) {
 
         const message = event.message ? event.message : event;
+
+        message.text = Message.removeDoubleSpaces(message.text);
+
         const {teamId} = obj;
         if (event.subtype) message.subtype = event.subtype
         message.team = teamId;
@@ -76,10 +83,10 @@ export default class Message {
         const writeable = {thumb, parent, ts, type, subtype, channel, user, text, team, attachments};
         await pool.query('INSERT INTO `events` SET ?', writeable);
         if (runTriggers) {
+            console.log('running triggers...');
             Message.runTriggers(obj, message);
         }
     }
-
 
     public static async updateMessage(obj: any, event: any) {
         const team = obj.teamId;
@@ -137,19 +144,28 @@ export default class Message {
         return promise;
     }
 
-    public static async findTrigger(obj: any, event: any) {
-        const message = event.message ? event.message : event;
+    public static async findTrigger(obj: any, message: any) {
         const trigger = message.text.split(' ', 1)[0];
         const triggerPhrase = trigger.substr(1).toLowerCase();
         message.triggerPhrase = triggerPhrase;
+        message.trigger = `${TRIGGER_PREFIX}${triggerPhrase}`;
         const RC = registeredCommands.filter(command => {
             return command.commands.indexOf(triggerPhrase) !== -1;
         });
-        if (RC.length) return RC[0];
+        if (RC.length) {
+            console.log('Found trigger', RC[0]);
+            return RC[0];
+        }
         return false;
     }
 
-    public static async runTriggers(obj: any, message: any) {
+    public static async runTriggers(obj: any, event: any) {
+
+        const message = event.message ? event.message : event;
+
+        if (message.text.substring(0,1) !== TRIGGER_PREFIX) return;
+
+        console.log('Running triggers on', message.text);
 
         const command = await Message.findTrigger(obj, message);
         if (command) {
@@ -163,9 +179,12 @@ export default class Message {
         return false;
     }
 
-    public static splitTrigger(text: string, trigger: string): string[] {
-        console.log('splitt', text, trigger);
-        return [trigger, text.substring(trigger.length + 1)];
+    public static splitTrigger(text: string): string[] {
+        const split = text.split(' ');
+        const trigger = split.shift() || '';
+        const action = split.shift() || '';
+        const params = split;
+        return [text, trigger, action, ...params];
     }
 
     public static installObj(install: IInstall) {
