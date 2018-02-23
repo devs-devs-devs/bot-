@@ -46,6 +46,7 @@ class Daemon {
                 this.connectInstall(install.team);
             }
         });
+        new LifeProTips();
 
     }
 
@@ -122,7 +123,6 @@ class Daemon {
                 rtm.on(RTM_EVENTS.MEMBER_JOINED_CHANNEL, Members.in);
 
                 await Megahal.init(this.getInstalls());
-                new LifeProTips();
             }
 
         });
