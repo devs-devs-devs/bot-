@@ -16,7 +16,10 @@ import Markov from '../commands/Markov';
 
 const TRIGGER_PREFIX: string = '!';
 const pool: Pool = BotData.getPool();
-const triggerScan = new Trigger()
+const triggerScan = new Trigger();
+
+const Entities = require('html-entities').AllHtmlEntities;
+const entities = new Entities();
 
 const registeredCommands = [
     new Seen(),
@@ -73,6 +76,7 @@ export default class Message {
 
         const message = event.message ? event.message : event;
 
+        message.text = entities.decode(message.text);
         message.text = Message.removeDoubleSpaces(message.text);
 
         const {teamId} = obj;

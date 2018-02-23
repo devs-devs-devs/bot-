@@ -33,6 +33,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^5.0.0",
     "express": "^4.16.2",
+    "html-entities": "^1.2.1",
     "javascript-time-ago": "^1.0.28",
     "jsmegahal": "github:devs-devs-devs/jsmegahal",
     "lodash": "^4.17.5",
