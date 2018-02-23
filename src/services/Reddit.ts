@@ -19,7 +19,7 @@ class Reddit {
     }
 
     public addPostWatcher(subreddit: string) {
-        this.snoops[subreddit] = this.snoops[subreddit] || this.snooper.getPostWatcher(subreddit);
+        this.snoops[subreddit] = this.snoops[subreddit] || this.snooper.watcher.getPostWatcher(subreddit);
         return this.snoops[subreddit];
     }
 
