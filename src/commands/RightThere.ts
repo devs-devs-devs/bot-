@@ -28,21 +28,19 @@ export default class RightThere extends Command {
 
     async reply(message: any, obj: any) {
 
-        const [ trigger, params ] = Message.splitTrigger(message.text);
+        let [text, trigger, shit, ...emojis] = Message.splitTrigger(message.text);
 
-        if (!params) return 'No params';
-
-        const typeOfShit = params.trim().split(' ', 1)[0];
-        const emojis = params.trim().substring(params.indexOf(typeOfShit) + typeOfShit.length).split(' ');
+        if (!shit) shit = 'good';
+        if (!emojis.length) emojis = [':100:', ':ok_hand:', ':eyes:'];
 
         const reply = [];
         reply.push(this.randomEmojis(emojis, 7));
-        reply.push(`${typeOfShit} shit`);
-        reply.push(this.mixWordCase(`${typeOfShit} shit`));
+        reply.push(`${shit} shit`);
+        reply.push(this.mixWordCase(`${shit} shit`));
         reply.push(this.randomEmojis(emojis, 1));
         reply.push('thats');
         reply.push(this.randomEmojis(emojis, 1));
-        reply.push(`some ${typeOfShit}`);
+        reply.push(`some ${shit}`);
         reply.push(this.randomEmojis(emojis, 2));
         reply.push(`shit right`);
         reply.push(this.randomEmojis(emojis, 2));
@@ -60,7 +58,7 @@ export default class RightThere extends Command {
         reply.push(this.randomEmojis(emojis, 4));
         reply.push(`ZO0ОଠOOOOOОଠଠOoooᵒᵒᵒᵒᵒᵒᵒᵒᵒᵐ:`);
         reply.push(this.randomEmojis(emojis, 10));
-        reply.push(`${typeOfShit} shit`);
+        reply.push(`${shit} shit`);
 
         return reply.join(' ');
 
