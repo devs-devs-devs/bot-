@@ -22,11 +22,9 @@ export default class Seen extends Command {
 
     async reply(message: any, obj: any) {
 
-        const [ trigger, params ] = Message.splitTrigger(message.text);
+        const [text, trigger, user, ...params] = Message.splitTrigger(message.text);
 
-        if (!params) return 'No params';
-
-        const user = params.trim().split(' ')[0];
+        if (!user) return 'No user';
 
         if (!user.match(/<@(\w{9})>/gi)) {
             return 'No user';
