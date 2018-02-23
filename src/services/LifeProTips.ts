@@ -1,6 +1,6 @@
 import reddit from './Reddit';
 import daemon from './Daemon';
-import IInstall from '../interfaces/iinstall';
+import Logger from './Logger';
 import Message from '../slack-types/Message';
 
 const personalisedReplies = [
@@ -36,8 +36,9 @@ export default class LifeProTips {
             const obj = Message.installObj(install);
             const { channel, user } = reply;
             reddit.addPostWatcher(reply.subreddit)
-                .on('post', (comment: any) => {
-                    const msg = `<@${user}> ${comment.data.title} ${comment.data.url}`;
+                .on('post', (post: any) => {
+                    Logger.info(post);
+                    const msg = `<@${user}> ${post.data.title} ${post.data.url}`;
                     Message.sendMessage(obj, msg, { channel });
                 });
 
