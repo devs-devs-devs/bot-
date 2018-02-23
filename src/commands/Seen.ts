@@ -22,7 +22,7 @@ export default class Seen extends Command {
 
     async reply(message: any, obj: any) {
 
-        const [ trigger, params ] = Message.splitTrigger(message.text, message.triggerPhrase);
+        const [ trigger, params ] = Message.splitTrigger(message.text);
 
         if (!params) return 'No params';
 

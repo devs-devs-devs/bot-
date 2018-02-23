@@ -15,6 +15,7 @@ import IInstall from '../interfaces/iinstall';
 import Message from '../slack-types/Message';
 import Presence from '../slack-types/Presence';
 import Members from '../slack-types/Members';
+import LifeProTips from './LifeProTips';
 
 class Daemon {
 
@@ -114,6 +115,7 @@ class Daemon {
                 rtm.on(RTM_EVENTS.DND_UPDATED_USER, presenceChange);
                 rtm.on(RTM_EVENTS.MANUAL_PRESENCE_CHANGE, presenceChange);
                 rtm.on(RTM_EVENTS.MEMBER_JOINED_CHANNEL, Members.in);
+                new LifeProTips();
             }
 
         });
