@@ -34,6 +34,7 @@
     "dotenv": "^5.0.0",
     "express": "^4.16.2",
     "javascript-time-ago": "^1.0.28",
+    "jsmegahal": "^1.2.4",
     "lodash": "^4.17.5",
     "md5": "^2.2.1",
     "mysql": "^2.15.0",

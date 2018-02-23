@@ -11,6 +11,8 @@ import RightThere from '../commands/RightThere';
 import Copypasta from '../commands/Copypasta';
 import Trigger from '../commands/Trigger';
 import { QDB } from '../commands/QDB';
+import Megahal from '../services/Megahal';
+import Markov from '../commands/Markov';
 
 const TRIGGER_PREFIX: string = '!';
 const pool: Pool = BotData.getPool();
@@ -23,6 +25,7 @@ const registeredCommands = [
     new Copypasta(),
     triggerScan,
     new QDB(),
+    new Markov(),
 ];
 
 export default class Message {
@@ -163,7 +166,7 @@ export default class Message {
 
         const message = event.message ? event.message : event;
 
-        if (message.text.substring(0,1) !== TRIGGER_PREFIX) return;
+        if (message.text.substring(0,1) !== TRIGGER_PREFIX) return Megahal.add(obj.teamId, message.text);
 
         console.log('Running triggers on', message.text);
 

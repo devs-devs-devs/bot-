@@ -16,6 +16,7 @@ import Message from '../slack-types/Message';
 import Presence from '../slack-types/Presence';
 import Members from '../slack-types/Members';
 import LifeProTips from './LifeProTips';
+import Megahal from './Megahal';
 
 class Daemon {
 
@@ -28,6 +29,10 @@ class Daemon {
 
     public getInstall(teamId: string) {
         return this.installs.get(teamId);
+    }
+
+    public getInstalls() {
+        return this.installs;
     }
 
     private async fetchInstalls() {
@@ -115,7 +120,8 @@ class Daemon {
                 rtm.on(RTM_EVENTS.DND_UPDATED_USER, presenceChange);
                 rtm.on(RTM_EVENTS.MANUAL_PRESENCE_CHANGE, presenceChange);
                 rtm.on(RTM_EVENTS.MEMBER_JOINED_CHANNEL, Members.in);
-                new LifeProTips();
+
+                await Megahal.init(this.getInstalls());
             }
 
         });
