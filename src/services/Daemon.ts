@@ -22,6 +22,7 @@ class Daemon {
 
     private pool: Pool = BotData.getPool();
     private installs: Map<string, IInstall> = new Map();
+    private eventsBound: boolean = false;
 
     public init() {
         this.fetchInstalls();
@@ -72,19 +73,22 @@ class Daemon {
 
     private bindEvents(install: IInstall) {
 
+        if (this.eventsBound) return;
+        this.eventsBound = true;
+
         if (!install) return Logger.error('No install passed into bindEvents');
         if (!install.store) {
             install.store = {
-                teamId:'',
-                botId:'',
-                channels:[]
+                teamId: '',
+                botId: '',
+                channels: []
             };
         }
 
-        const { rtm, store } = install;
+        const {rtm, store} = install;
 
         rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, async (connectData: any) => {
-            const { domain, name, id } = connectData.team;
+            const {domain, name, id} = connectData.team;
             const blob = JSON.stringify(connectData);
             await this.pool.query('UPDATE `installs` SET `domain` = ?, `name` = ?, `json` = ? WHERE `team` = ?', [domain, name, blob, id]);
 
@@ -92,7 +96,7 @@ class Daemon {
             store.teamId = connectData.team.id;
 
             if (store.teamId) {
-                const { teamId } = store;
+                const {teamId} = store;
                 await this.requestChannels(teamId);
                 await this.requestMembers(teamId);
                 rtm.on(RTM_EVENTS.MESSAGE, (event: ISlackEvent) => {
@@ -104,6 +108,7 @@ class Daemon {
                     // Logger.info(teamId, event);
                     // Presence.in(install, event);
                 }
+
                 //
                 // console.log(RTM_EVENTS);
                 //
@@ -139,9 +144,9 @@ class Daemon {
         const install = this.installs.get(teamId);
         if (!install) return Logger.error('No install exists for team', teamId);
 
-        const { web, store } = install;
+        const {web, store} = install;
 
-        const channelObj: {channels:IBotSlackChannel[]} = await web.channels.list();
+        const channelObj: { channels: IBotSlackChannel[] } = await web.channels.list();
 
         channelObj.channels.forEach((channel) => {
             channel.teamId = teamId;
@@ -158,7 +163,7 @@ class Daemon {
         const install = this.installs.get(teamId);
         if (!install) return Logger.error('No install exists for team', teamId);
 
-        const { web, store } = install;
+        const {web, store} = install;
         const membersObj = await web.users.list();
 
         membersObj.members.forEach((member: any) => {
@@ -173,13 +178,13 @@ class Daemon {
         Logger.info(`Persisting members`);
 
         this.installs.forEach(async (install: IInstall) => {
-            const { store } = install;
+            const {store} = install;
             if (!store) return;
             const membersArr = Array.from(store.members) as any;
 
             await Promise.all(membersArr.map(async ([memberId, member]: [string, any]) => {
                 const profile = JSON.stringify(member.profile);
-                const { id, team_id, name, deleted, is_bot, updated, is_app_user } = member;
+                const {id, team_id, name, deleted, is_bot, updated, is_app_user} = member;
                 await this.pool.query(`INSERT INTO members (id, team_id, name, deleted, profile, is_bot, updated, is_app_user)
             VALUES(?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = ?, deleted = ?, profile = ?, updated = ?`, [id, team_id, name, deleted, profile, is_bot, updated, is_app_user, name, deleted, profile, updated]);
             }));

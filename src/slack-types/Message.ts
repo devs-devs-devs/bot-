@@ -36,7 +36,7 @@ export default class Message {
     public static async in(install: IInstall, event: any) {
         const obj = Message.installObj(install);
 
-        if ( (event.subtype && event.subtype === 'bot_message') ||
+        if ((event.subtype && event.subtype === 'bot_message') ||
             (!event.subtype && event.user === obj.botId) ||
             (event.message && event.message.user === obj.botId)) {
             return;
@@ -97,8 +97,8 @@ export default class Message {
 
     public static async updateMessage(obj: any, event: any) {
         const team = obj.teamId;
-        const { channel, message, subtype } = event;
-        const { ts, user, type, text, attachments = null } = message;
+        const {channel, message, subtype} = event;
+        const {ts, user, type, text, attachments = null} = message;
 
         const thumb = Message.thumb(ts, channel, user, team);
 
@@ -117,28 +117,28 @@ export default class Message {
             });
 
         }
-        await Message.writeMessage(obj, { thumb, ts, type, subtype, channel, user, text, team, attachments }, false)
+        await Message.writeMessage(obj, {thumb, ts, type, subtype, channel, user, text, team, attachments}, false)
     }
 
     public static async deletedMessage(obj: any, event: any) {
-        const { teamId } = obj;
-        const { channel, previous_message: { ts, user } } = event;
+        const {teamId} = obj;
+        const {channel, previous_message: {ts, user}} = event;
         const thumb = Message.thumb(ts, channel, user, teamId);
         await pool.query('UPDATE `events` SET edited = ? WHERE thumb = ?', [event.deleted_ts, thumb]);
     }
 
     public static async repliedMessage(obj: any, event: any) {
-        const { teamId } = obj;
+        const {teamId} = obj;
     }
 
-    public static thumb(ts: any, channel: string, user:string, team: string) {
+    public static thumb(ts: any, channel: string, user: string, team: string) {
         return md5(Array.from(arguments).join(''));
     }
 
     public static async sendMessage(obj: any, reply: any, message: any) {
         if (!reply) return;
-        const { teamId } = obj;
-        const { channel } = message;
+        const {teamId} = obj;
+        const {channel} = message;
         const promise = typeof reply === 'string' ? obj.install.rtm.sendMessage(reply, channel) : obj.install.rtm.send(reply);
         promise.then(async (event: any) => {
             event.userts = message.ts;
@@ -170,7 +170,7 @@ export default class Message {
 
         const message = event.message ? event.message : event;
 
-        if (message.text.substring(0,1) !== TRIGGER_PREFIX) return Megahal.add(obj.teamId, message.text);
+        if (message.text.substring(0, 1) !== TRIGGER_PREFIX) return Megahal.add(obj.teamId, message.text);
 
         console.log('Running triggers on', message.text);
 
@@ -199,8 +199,10 @@ export default class Message {
         const rtm = _.get(install, 'rtm', null);
         const botId = _.get(install, 'store.botId', null);
         const teamId = _.get(install, 'store.teamId', null);
-        if (!install || !store || !rtm || !botId || !teamId) throw new Error('invalid install');
-        return { install, store, botId, teamId };
+        if (!install || !store || !rtm || !botId || !teamId) {
+            throw new Error('invalid install');
+        }
+        return {install, store, botId, teamId};
     }
 
 }
