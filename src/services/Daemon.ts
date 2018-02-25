@@ -22,7 +22,7 @@ class Daemon {
 
     private pool: Pool = BotData.getPool();
     private installs: Map<string, IInstall> = new Map();
-    private eventsBound: boolean = false;
+    private eventsBound: any = {};
 
     public init() {
         this.fetchInstalls();
@@ -73,8 +73,8 @@ class Daemon {
 
     private bindEvents(install: IInstall) {
 
-        if (this.eventsBound) return;
-        this.eventsBound = true;
+        if (this.eventsBound[install.team]) return console.log('events already bound');
+        this.eventsBound[install.team] = true;
 
         if (!install) return Logger.error('No install passed into bindEvents');
         if (!install.store) {
