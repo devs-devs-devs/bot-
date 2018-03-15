@@ -20,8 +20,9 @@ export class Bruh extends Command {
 
         const { channel } = message;
 
-        const [ stats ] = await this.pool.query(`SELECT COUNT(*) as \`count\`, e.name
+        const [ stats ] = await this.pool.query(`SELECT COUNT(*) as \`count\`, m.name
             FROM \`events\` e
+            LEFT JOIN \`members\` m ON e.user = m.id
             WHERE e.type = 'message'
                 AND e.subtype IS NULL
                 AND e.edited = 0
