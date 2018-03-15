@@ -32,7 +32,7 @@ export class Bruh extends Command {
             LIMIT 15`, [channel]) as any;
 
         const msg = stats.reduce((str: string, stat: any, index: number) => {
-            return str += `*${index + 1}*:\t${stat.count}\t\t${stat.name}\n`;
+            return str += `*${index + 1}*:\t\t${stat.count}\t\t\t\t${stat.name}\n`;
         }, '🥁 *_aaaand the award for the biggest dinlo in this channel goes to...._* 🥁\n');
 
         console.log(msg);
