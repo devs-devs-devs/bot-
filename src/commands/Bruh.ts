@@ -18,9 +18,9 @@ export class Bruh extends Command {
 
     async reply(message: any, obj: any) {
 
-        const { channel } = message;
+        const {channel} = message;
 
-        const [ stats ] = await this.pool.query(`SELECT COUNT(*) as \`count\`, m.name
+        const [stats] = await this.pool.query(`SELECT COUNT(*) as \`count\`, m.name
             FROM \`events\` e
             LEFT JOIN \`members\` m ON e.user = m.id
             WHERE e.type = 'message'
@@ -31,8 +31,12 @@ export class Bruh extends Command {
             ORDER BY \`count\` DESC
             LIMIT 15`, [channel]) as any;
 
+        const largestNumber = (stats[0].count).toLocateString('en-GB').length;
+
         const msg = stats.reduce((str: string, stat: any, index: number) => {
-            return str += `*${index + 1}*:\t\t${stat.count}\t\t\t\t${stat.name}\n`;
+            const position = (`*${index}*` as any).padStart(5);
+            const count = (`${(stat.count).toLocateString('en-GB')}` as any).padStart(largestNumber);
+            return str += `${position}\t${count}\t${stat.name}`;
         }, '🥁 *_aaaand the award for the biggest dinlo in this channel goes to...._* 🥁\n');
 
         console.log(msg);
