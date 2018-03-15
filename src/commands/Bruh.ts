@@ -34,9 +34,9 @@ export class Bruh extends Command {
         const largestNumber = (stats[0].count).toLocaleString('en-GB').length;
 
         const msg = stats.reduce((str: string, stat: any, index: number) => {
-            const position = (`*${index}*` as any).padStart(5);
+            const position = (`*${index + 1}*` as any).padStart(5);
             const count = (`${(stat.count).toLocaleString('en-GB')}` as any).padStart(largestNumber);
-            return str += `${position}\t${count}\t${stat.name}`;
+            return str += `${position}\t${count}\t${stat.name}\n`;
         }, '🥁 *_aaaand the award for the biggest dinlo in this channel goes to...._* 🥁\n');
 
         console.log(msg);
