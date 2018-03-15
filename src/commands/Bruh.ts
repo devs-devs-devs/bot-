@@ -31,11 +31,11 @@ export class Bruh extends Command {
             ORDER BY \`count\` DESC
             LIMIT 15`, [channel]) as any;
 
-        const largestNumber = (stats[0].count).toLocateString('en-GB').length;
+        const largestNumber = (stats[0].count).toLocaleString('en-GB').length;
 
         const msg = stats.reduce((str: string, stat: any, index: number) => {
             const position = (`*${index}*` as any).padStart(5);
-            const count = (`${(stat.count).toLocateString('en-GB')}` as any).padStart(largestNumber);
+            const count = (`${(stat.count).toLocaleString('en-GB')}` as any).padStart(largestNumber);
             return str += `${position}\t${count}\t${stat.name}`;
         }, '🥁 *_aaaand the award for the biggest dinlo in this channel goes to...._* 🥁\n');
 
