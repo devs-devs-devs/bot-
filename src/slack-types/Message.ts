@@ -172,16 +172,21 @@ export default class Message {
 
         const message = event.message ? event.message : event;
 
-        if (message.text.substring(0, 1) !== TRIGGER_PREFIX) return Megahal.add(obj.teamId, message.text);
+        if (message.text.substring(0, 1) !== TRIGGER_PREFIX) {
+            Megahal.add(obj.teamId, message.text);
+            console.log('Scanning for trigger');
+            const reply = await triggerScan.scan(message, obj);
+            if (reply) {
+                return Message.sendMessage(obj, reply, message);
+            }
+            return;
+        }
 
         console.log('Running triggers on', message.text);
 
         const command = await Message.findTrigger(obj, message);
         if (command) {
             const reply = await command.reply(message, obj);
-            if (reply) return Message.sendMessage(obj, reply, message);
-        } else {
-            const reply = await triggerScan.scan(message, obj);
             if (reply) return Message.sendMessage(obj, reply, message);
         }
 
