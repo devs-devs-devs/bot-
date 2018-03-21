@@ -75,6 +75,8 @@ export default class Trigger extends Command {
         const text = message.text.toLowerCase();
         const triggers = _.shuffle(text.split(' '));
 
+        console.log('Triggers', triggers);
+
         while (triggers.length) {
             const trigger = triggers.pop();
 
