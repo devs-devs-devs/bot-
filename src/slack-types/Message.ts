@@ -14,6 +14,7 @@ import { QDB } from '../commands/QDB';
 import Megahal from '../services/Megahal';
 import Markov from '../commands/Markov';
 import { Bruh } from '../commands/Bruh';
+import { Wurd } from '../commands/Wurd';
 
 const TRIGGER_PREFIX: string = '!';
 const pool: Pool = BotData.getPool();
@@ -31,6 +32,7 @@ const registeredCommands = [
     new QDB(),
     new Markov(),
     new Bruh(),
+    new Wurd(),
 ];
 
 export default class Message {
