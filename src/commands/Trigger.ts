@@ -11,7 +11,7 @@ export default class Trigger extends Command {
     private pool: Pool = BotData.getPool();
     private currentlyShitposting: boolean = false;
     private triggerReplyInterval: number = 1000 * 60 * 10;
-    
+
     private async broadcastShitpost(enabled: boolean) {
         const [channels] = await this.pool.query('SELECT `id`, `team` FROM `channels`') as any;
         channels.forEach((channel: any) => {
@@ -143,9 +143,8 @@ export default class Trigger extends Command {
                 return phrase;
 
             }
-
-            return '';
         }
+        return '';
 
     }
 
