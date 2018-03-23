@@ -6,7 +6,7 @@ import _ = require('lodash');
 
 export default class Trigger extends Command {
 
-    private triggerChanceToSpeak: number = 95;
+    private triggerChanceToSpeak: number = 20;
     private triggerReplyInterval: number = 1000 * 60 * 10;
 
     private pool: Pool = BotData.getPool();
@@ -56,6 +56,9 @@ export default class Trigger extends Command {
         if (!_.get(obj, 'install.store.lastTrigger', false)) {
             obj.install.store.lastTrigger = 0;
         }
+
+        // const [chanceToSpeak] = await this.pool.query('SELECT `chancetospeak` FROM `installs` WHERE `team` = ?', [obj.teamId]) as any;
+        // this.triggerChanceToSpeak = 100 - chanceToSpeak[0];
 
         const { store } = obj.install;
 
