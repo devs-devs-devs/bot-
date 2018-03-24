@@ -175,7 +175,11 @@ export default class Message {
         const message = event.message ? event.message : event;
 
         if (message.text.substring(0, 1) !== TRIGGER_PREFIX) {
-            Megahal.add(obj.teamId, message.text);
+
+            if (message.channel.substring(0,1) !== 'G') {
+                Megahal.add(obj.teamId, message.text);
+            }
+
             console.log('Scanning for trigger');
             const reply = await triggerScan.scan(message, obj);
             if (reply) {

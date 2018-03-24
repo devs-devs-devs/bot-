@@ -20,11 +20,15 @@ class Megahal {
             promises.push(Promise.resolve().then(async () => {
                 const { team } = install;
                 this.megahals[team] = new jsmegahal(4);
-                const [rows] = await this.pool.query("SELECT * FROM `events` WHERE `team` = ? AND `type`='message' AND edited = 0", [team]) as any;
+                const [rows] = await this.pool.query(`SELECT e.* 
+FROM \`events\` e
+WHERE e.channel NOT LIKE 'G%'
+AND e.type ='message' 
+AND e.edited = 0`, [team]) as any;
                 rows.forEach((row: any) => {
                     this.add(team, row.text.toString());
                 });
-            }))
+            }));
         });
         return Promise.all(promises);
     }

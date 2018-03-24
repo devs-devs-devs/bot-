@@ -202,7 +202,7 @@ class Daemon {
             await Promise.all(channelsArr.map(async ([channelId, channel]: [string, IBotSlackChannel]) => {
                 const teamId = channel.teamId;
                 const blob = JSON.stringify(channel);
-                await this.pool.query('INSERT INTO channels (id, team, json) VALUES (?,?,?) ON DUPLICATE KEY UPDATE json = ?', [channel.id, teamId, blob, blob]);
+                await this.pool.query('INSERT INTO channels (id, team, json, private) VALUES (?,?,?, ?) ON DUPLICATE KEY UPDATE json = ?', [channel.id, teamId, blob, channel.is_private, blob]);
             }));
 
         });
