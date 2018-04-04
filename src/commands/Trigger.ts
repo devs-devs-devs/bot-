@@ -41,7 +41,7 @@ export default class Trigger extends Command {
         const currentHour = now.getHours();
 
         // Has to be friday
-        if (now.getDay() !== 4) return chanceToSpeak;
+        if (now.getDay() !== 5) return chanceToSpeak;
 
         if (currentHour >= startTimeHours && currentHour <= endTimeHours) {
             if (!this.currentlyShitposting) {
