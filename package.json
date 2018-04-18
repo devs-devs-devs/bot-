@@ -30,6 +30,8 @@
     "body-parser": "^1.18.2",
     "bunyan": "^1.8.12",
     "chalk": "^2.3.1",
+    "chart.js": "^2.7.2",
+    "chartjs-node": "^1.6.1",
     "crypto": "^1.0.1",
     "dotenv": "^5.0.0",
     "express": "^4.16.2",

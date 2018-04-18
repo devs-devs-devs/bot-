@@ -15,6 +15,8 @@ import Megahal from '../services/Megahal';
 import Markov from '../commands/Markov';
 import { Bruh } from '../commands/Bruh';
 import { Wurd } from '../commands/Wurd';
+import Daemon from '../services/Daemon';
+import { Stats } from '../commands/Stats';
 
 const TRIGGER_PREFIX: string = '!';
 const pool: Pool = BotData.getPool();
@@ -33,6 +35,7 @@ const registeredCommands = [
     new Markov(),
     new Bruh(),
     new Wurd(),
+    new Stats(),
 ];
 
 export default class Message {
